@@ -51,6 +51,7 @@ import logging
 logger = logging.getLogger(__name__)
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 from utils import rm_dir, execute
+from lazybot.ran_text import random_char
 
 req_channel = REQ_CHANNEL
 BUTTONS = {}
@@ -82,6 +83,7 @@ async def doc(bot, update):
     file_path = f"downloads/{new_filename}"
     ms = await update.message.edit("\n༻☬ད 𝘽𝙪𝙞𝙡𝙙𝙞𝙣𝙜 𝙇𝙖𝙯𝙮 𝙈𝙚𝙩𝙖𝘿𝙖𝙩𝙖...")
     c_time = time.time()
+    random1 = random_char(5)
     tmp_directory_for_each_user = DOWNLOAD_LOCATION + "/" + str(query.from_user.id) + f'{random1}'
     if not os.path.isdir(tmp_directory_for_each_user):
         os.makedirs(tmp_directory_for_each_user)
