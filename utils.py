@@ -426,7 +426,7 @@ def get_readable_time(seconds: int) -> str:
     readable_time += ": ".join(time_list)
     return readable_time 
 
-async def rm_dir(root: str = f"{DOWNLOAD_DIR}"):
+async def rm_dir(root: str = f"{DOWNLOAD_LOCATION}"):
     """
     Delete a Folder.
 
