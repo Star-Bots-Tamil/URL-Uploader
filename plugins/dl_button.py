@@ -119,12 +119,12 @@ async def ddl_call_back(client, query):
     description = script.CUSTOM_CAPTION_UL_FILE
     if "fulltitle" in response_json:
         description = response_json["fulltitle"][0:1021]
-    tmp_directory_for_each_user = DOWNLOAD_LOCATION + "/" + str(query.from_user.id) + f'{random1}'
-    if not os.path.isdir(tmp_directory_for_each_user):
-        os.makedirs(tmp_directory_for_each_user)
-    download_directory = tmp_directory_for_each_user + "/" + custom_file_name
-    command_to_exec = []
     async with aiohttp.ClientSession() as session:
+        tmp_directory_for_each_user = DOWNLOAD_LOCATION + "/" + str(query.from_user.id) + f'{random1}'
+        if not os.path.isdir(tmp_directory_for_each_user):
+            os.makedirs(tmp_directory_for_each_user)
+        download_directory = tmp_directory_for_each_user + "/" + custom_file_name
+        command_to_exec = []
         c_time = time.time()
         try:
             the_media = await download_coroutine(
