@@ -8,6 +8,9 @@ from pyrogram import enums
 from typing import Union
 import re
 import os
+import shlex
+import asyncio
+from typing import Tuple
 from datetime import datetime
 from typing import List
 from database.users_chats_db import db
@@ -449,3 +452,22 @@ async def rm_file(file_path: str):
         await aiofiles.os.remove(file_path)
     except:
         pass
+
+async def execute(cmnd: str) -> Tuple[str, str, int, int]:
+    """
+    Execute a Command as Async.
+
+    :param cmnd: Pass Command as String.
+    """
+
+    cmnds = shlex.split(cmnd)
+    process = await asyncio.create_subprocess_exec(
+        *cmnds,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+    stdout, stderr = await process.communicate()
+    return (stdout.decode('utf-8', 'replace').strip(),
+            stderr.decode('utf-8', 'replace').strip(),
+            process.returncode,
+            process.pid)
