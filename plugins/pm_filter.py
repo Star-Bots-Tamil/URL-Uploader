@@ -12,6 +12,10 @@ import asyncio
 import re
 import ast
 import math
+import time
+import json
+import shlex
+import shutil
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from Script import script
 from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, \
@@ -46,6 +50,7 @@ from util.file_properties import get_name, get_hash, get_media_file_size
 import logging
 logger = logging.getLogger(__name__)
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
+from utils import rm_dir, execute
 
 req_channel = REQ_CHANNEL
 BUTTONS = {}
@@ -70,6 +75,7 @@ async def rename(bot,update):
 @Client.on_callback_query(filters.regex("upload"))
 async def doc(bot, update):
     type = update.data.split("_")[1]
+    title = "StarMovies.hop.sh"
     new_name = update.message.text
     new_filename = new_name.split(":-")[1]
     file = update.message.reply_to_message
@@ -88,6 +94,37 @@ async def doc(bot, update):
     dow_file_name = splitpath[1]
     old_file_name =f"downloads/{dow_file_name}"
     os.rename(old_file_name, file_path)
+    await ms.edit("Trying to Fetch Media Metadata ...")
+    output = await execute(f"ffprobe -hide_banner -show_streams -print_format json {shlex.quote(path)}")
+    if not output:
+        await rm_dir(download_directory)
+        return await ms.edit("Can't fetch media info!")
+
+    try:
+        details = json.loads(output[0])
+        middle_cmd = f"ffmpeg -i {shlex.quote(path)} -c copy -map 0"
+        if title:
+            middle_cmd += f' -metadata title="{title}"'
+        for stream in details["streams"]:
+            if (stream["codec_type"] == "video") and title:
+                middle_cmd += f' -metadata:s:{stream["index"]} title="{title}"'
+            elif (stream["codec_type"] == "audio") and title:
+                middle_cmd += f' -metadata:s:{stream["index"]} title="{title}"'
+            elif (stream["codec_type"] == "subtitle") and title:
+                middle_cmd += f' -metadata:s:{stream["index"]} title="{title}"'
+        download_directory = download_directory + str(time.time()).replace(".", "") + "/"
+        if not os.path.isdir(download_directory):
+            os.makedirs(download_directory)
+        middle_cmd += f" {shlex.quote(download_directory + new_file_name)}"
+        await execute(middle_cmd)
+        await ms.edit("Renamed Successfully!")
+    except:
+        # Clean Up
+        await ms.edit("Failed to process video!")
+        await rm_dir(download_directory)
+        return
+    try: os.remove(path)
+    except: pass
     duration = 0
     try:
         metadata = extractMetadata(createParser(file_path))
