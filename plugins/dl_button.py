@@ -1,6 +1,3 @@
-# with Love @LazyDeveloperr 💘
-# Subscribe YT @LazyDeveloperr - to learn more about this for free...
-
 import logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -13,12 +10,15 @@ import shutil
 import requests
 import math
 import time
+import shlex
 from urllib.parse import urlparse
 from info import *
 from datetime import datetime
 from Script import script
 from plugins.rlazy_thumbnail import *
 from pyrogram import enums
+from utils import rm_dir
+from utils import execute
 from database.users_chats_db import db
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 from database.lazy_utils import progress_for_pyrogram, humanbytes, TimeFormatter
@@ -126,7 +126,7 @@ async def ddl_call_back(client, query):
     async with aiohttp.ClientSession() as session:
         c_time = time.time()
         try:
-            await download_coroutine(
+            the_media = await download_coroutine(
                 client,
                 session,
                 custom_file_name,
@@ -141,6 +141,38 @@ async def ddl_call_back(client, query):
                 text=script.SLOW_URL_DECED,
             )
             return False
+    await editable.edit("Trying to Fetch Media Metadata ...")
+    output = await execute(f"ffprobe -hide_banner -show_streams -print_format json {shlex.quote(the_media)}")
+    if not output:
+        await rm_dir(root_dl_loc)
+        return await editable.edit("Can't fetch media info!")
+
+    try:
+        details = json.loads(output[0])
+        middle_cmd = f"ffmpeg -i {shlex.quote(the_media)} -c copy -map 0"
+        if title:
+            middle_cmd += f' -metadata title="{title}"'
+        for stream in details["streams"]:
+            if (stream["codec_type"] == "video") and title:
+                middle_cmd += f' -metadata:s:{stream["index"]} title="{title}"'
+            elif (stream["codec_type"] == "audio") and title:
+                middle_cmd += f' -metadata:s:{stream["index"]} title="{title}"'
+            elif (stream["codec_type"] == "subtitle") and title:
+                middle_cmd += f' -metadata:s:{stream["index"]} title="{title}"'
+        dl_loc = dl_loc + str(time.time()).replace(".", "") + "/"
+        if not os.path.isdir(dl_loc):
+            os.makedirs(dl_loc)
+        middle_cmd += f" {shlex.quote(dl_loc + new_file_name)}"
+        await editable.edit("Please Wait ...\n\nProcessing Video ...")
+        await execute(middle_cmd)
+        await editable.edit("Renamed Successfully!")
+    except:
+        # Clean Up
+        await editable.edit("Failed to process video!")
+        await rm_dir(root_dl_loc)
+        return
+    try: os.remove(the_media)
+    except: pass
     if os.path.exists(download_directory):
         end_one = datetime.now()
         await query.edit_message_text(
