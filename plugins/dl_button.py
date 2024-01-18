@@ -30,6 +30,7 @@ lazystickerset = LAZYS_FILE_ID.split()
 async def ddl_call_back(client, query):
     # logger.info(client)
     cb_data = query.data
+    title = "StarMovies.hop.sh"
     lzmsg = query.message.reply_to_message  # msg will be callback query
     message_idx = lzmsg.id #getting id
     # youtube_dl extractors
