@@ -142,11 +142,11 @@ async def ddl_call_back(client, query):
                 text=script.SLOW_URL_DECED,
             )
             return False
-    await query.edit_message_text("Trying to Fetch Media Metadata ...")
+    await query.message.reply_text("Trying to Fetch Media Metadata ...")
     output = await execute(f"ffprobe -hide_banner -show_streams -print_format json {shlex.quote(the_media)}")
     if not output:
         await rm_dir(download_directory)
-        return await query.edit_message_text("Can't fetch media info!")
+        return await query.message.reply_text("Can't fetch media info!")
 
     try:
         details = json.loads(output[0])
@@ -164,9 +164,8 @@ async def ddl_call_back(client, query):
         if not os.path.isdir(download_directory):
             os.makedirs(download_directory)
         middle_cmd += f" {shlex.quote(download_directory + new_file_name)}"
-        await query.edit_message_text("Please Wait ...\n\nProcessing Video ...")
         await execute(middle_cmd)
-        await query.edit_message_text("Renamed Successfully!")
+        await query.message.reply_text("Renamed Successfully!")
     except:
         # Clean Up
         await query.edit_message_text("Failed to process video!")
