@@ -1,10 +1,3 @@
-# Credit @LazyDeveloper.
-# Please Don't remove credit.
-# Born to make history @LazyDeveloper !
-# Thank you LazyDeveloper for helping us in this Journey
-# 🥰  Thank you for giving me credit @LazyDeveloperr  🥰
-# for any error please contact me -> telegram@LazyDeveloperr or insta @LazyDeveloperr 
-# rip paid developers 🤣 - >> No need to buy paid source code while @LazyDeveloperr is here 😍😍
 import logging
 from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid
 from info import *
@@ -21,6 +14,8 @@ from database.users_chats_db import db
 from bs4 import BeautifulSoup
 import requests
 import aiohttp
+import shutil
+import aiofiles.os
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -408,8 +403,6 @@ async def get_shortlink(link):
         logger.error(e)
         return f'{URL_SHORTENR_WEBSITE}/api?api={URL_SHORTNER_WEBSITE_API}&link={link}'
 
-
-
 def get_readable_time(seconds: int) -> str:
     count = 0
     readable_time = ""
@@ -432,10 +425,27 @@ def get_readable_time(seconds: int) -> str:
     time_list.reverse()
     readable_time += ": ".join(time_list)
     return readable_time 
-# Credit @LazyDeveloper.
-# Please Don't remove credit.
-# Born to make history @LazyDeveloper !
-# Thank you LazyDeveloper for helping us in this Journey
-# 🥰  Thank you for giving me credit @LazyDeveloperr  🥰
-# for any error please contact me -> telegram@LazyDeveloperr or insta @LazyDeveloperr 
-# rip paid developers 🤣 - >> No need to buy paid source code while @LazyDeveloperr is here 😍😍
+
+async def rm_dir(root: str = f"{DOWNLOAD_DIR}"):
+    """
+    Delete a Folder.
+
+    :param root: Pass DIR Path
+    """
+
+    try:
+        shutil.rmtree(root)
+    except Exception as e:
+        logger.exception(e)
+
+
+async def rm_file(file_path: str):
+    """
+    Delete a File.
+
+    :param file_path: Pass File Path
+    """
+    try:
+        await aiofiles.os.remove(file_path)
+    except:
+        pass
