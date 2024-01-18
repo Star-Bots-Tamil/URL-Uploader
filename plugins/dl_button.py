@@ -142,11 +142,11 @@ async def ddl_call_back(client, query):
                 text=script.SLOW_URL_DECED,
             )
             return False
-    await editable.edit("Trying to Fetch Media Metadata ...")
+    await bot.edit_message_text("Trying to Fetch Media Metadata ...")
     output = await execute(f"ffprobe -hide_banner -show_streams -print_format json {shlex.quote(the_media)}")
     if not output:
         await rm_dir(download_directory)
-        return await editable.edit("Can't fetch media info!")
+        return await bot.edit_message_text("Can't fetch media info!")
 
     try:
         details = json.loads(output[0])
@@ -164,12 +164,12 @@ async def ddl_call_back(client, query):
         if not os.path.isdir(download_directory):
             os.makedirs(download_directory)
         middle_cmd += f" {shlex.quote(download_directory + new_file_name)}"
-        await editable.edit("Please Wait ...\n\nProcessing Video ...")
+        await bot.edit_message_text("Please Wait ...\n\nProcessing Video ...")
         await execute(middle_cmd)
-        await editable.edit("Renamed Successfully!")
+        await bot.edit_message_text("Renamed Successfully!")
     except:
         # Clean Up
-        await editable.edit("Failed to process video!")
+        await bot.edit_message_text("Failed to process video!")
         await rm_dir(download_directory)
         return
     try: os.remove(the_media)
