@@ -144,7 +144,7 @@ async def ddl_call_back(client, query):
     await editable.edit("Trying to Fetch Media Metadata ...")
     output = await execute(f"ffprobe -hide_banner -show_streams -print_format json {shlex.quote(the_media)}")
     if not output:
-        await rm_dir(root_dl_loc)
+        await rm_dir(download_directory)
         return await editable.edit("Can't fetch media info!")
 
     try:
@@ -159,17 +159,17 @@ async def ddl_call_back(client, query):
                 middle_cmd += f' -metadata:s:{stream["index"]} title="{title}"'
             elif (stream["codec_type"] == "subtitle") and title:
                 middle_cmd += f' -metadata:s:{stream["index"]} title="{title}"'
-        dl_loc = dl_loc + str(time.time()).replace(".", "") + "/"
-        if not os.path.isdir(dl_loc):
-            os.makedirs(dl_loc)
-        middle_cmd += f" {shlex.quote(dl_loc + new_file_name)}"
+        download_directory = download_directory + str(time.time()).replace(".", "") + "/"
+        if not os.path.isdir(download_directory):
+            os.makedirs(download_directory)
+        middle_cmd += f" {shlex.quote(download_directory + new_file_name)}"
         await editable.edit("Please Wait ...\n\nProcessing Video ...")
         await execute(middle_cmd)
         await editable.edit("Renamed Successfully!")
     except:
         # Clean Up
         await editable.edit("Failed to process video!")
-        await rm_dir(root_dl_loc)
+        await rm_dir(download_directory)
         return
     try: os.remove(the_media)
     except: pass
