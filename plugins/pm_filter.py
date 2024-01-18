@@ -82,6 +82,10 @@ async def doc(bot, update):
     file_path = f"downloads/{new_filename}"
     ms = await update.message.edit("\n༻☬ད 𝘽𝙪𝙞𝙡𝙙𝙞𝙣𝙜 𝙇𝙖𝙯𝙮 𝙈𝙚𝙩𝙖𝘿𝙖𝙩𝙖...")
     c_time = time.time()
+    tmp_directory_for_each_user = DOWNLOAD_LOCATION + "/" + str(query.from_user.id) + f'{random1}'
+    if not os.path.isdir(tmp_directory_for_each_user):
+        os.makedirs(tmp_directory_for_each_user)
+    download_directory = tmp_directory_for_each_user + "/" + new_filename
     try:
         path = await bot.download_media(
                 message=file,
